@@ -1,4 +1,5 @@
 
+[![](https://img.shields.io/badge/Unity-2018.2.12f1-green.svg)](https://unity3d.com/jp/unity/whatsnew/unity-2018.2.12)
 ![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)
 
 # Undopector
@@ -9,3 +10,7 @@
 # 使い方
 - `Window/Undopector`からウィンドウを表示する
 - 任意のアセットを選択後に`Undopector`のウィンドウのUndoボタンを押す
+
+# 使わせていただいたアセット
+- 矢印画像
+    - https://www.flaticon.com
