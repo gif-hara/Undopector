@@ -10,6 +10,7 @@
 Unity側の`Ctrl + z`を利用するとパラメータなどの変更も履歴として扱われるためアセットのみの履歴が欲しかったため作成しました。
 
 # 使い方
+- [最新版](https://github.com/hiroki-kitahara/Undopector/releases)をダウンロード
 - `Window/Undopector`からウィンドウを表示する
 - 任意のアセットを選択後に`Undopector`のウィンドウのUndoボタンを押す
 
