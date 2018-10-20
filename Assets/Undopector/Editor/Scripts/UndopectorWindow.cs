@@ -20,7 +20,7 @@ public class UndopectorWindow : EditorWindow
 
     private bool registerSelection = true;
 
-    [MenuItem("Window/Undopector/Open")]
+    [MenuItem("Window/Undopector")]
     private static void Open()
     {
         if(instance == null)
