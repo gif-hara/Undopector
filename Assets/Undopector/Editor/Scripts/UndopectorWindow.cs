@@ -120,6 +120,11 @@ public class UndopectorWindow : EditorWindow
 
     private void DrawSelectedInstanceIdList()
     {
+        if(!this.CanDrawSelectedInstanceIdList)
+        {
+            return;
+        }
+
         using (var scrollView = new GUILayout.ScrollViewScope(this.scrollPosition))
         {
             using (var iconSize = new EditorGUIUtility.IconSizeScope(Vector2.one * 14))
@@ -131,6 +136,14 @@ public class UndopectorWindow : EditorWindow
             }
 
             this.scrollPosition = scrollView.scrollPosition;
+        }
+    }
+
+    private bool CanDrawSelectedInstanceIdList
+    {
+        get
+        {
+            return this.position.width > WindowMinSize.x || this.position.height > WindowMinSize.y;
         }
     }
 
