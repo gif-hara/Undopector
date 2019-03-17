@@ -36,6 +36,12 @@ public class UndopectorWindow : EditorWindow
         CreateInstance();
         instance.ShowUtility();
         instance.minSize = WindowMinSize;
+        var position = instance.position;
+        position.x = 320;
+        position.y = 240;
+        position.width = WindowMinSize.x;
+        position.height = WindowMinSize.y;
+        instance.position = position;
     }
 
     [MenuItem("Window/Undopector")]
