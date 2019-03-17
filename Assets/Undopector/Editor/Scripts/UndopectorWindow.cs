@@ -20,31 +20,59 @@ public class UndopectorWindow : EditorWindow
 
     private bool registerSelection = true;
 
+    private Vector2 scrollPosition;
+
+    private static readonly Vector2 WindowMinSize = new Vector2(80, 24);
+
+    private static readonly GUILayoutOption[] ButtonGUILayoutOptions =
+    {
+        GUILayout.Width(24),
+        GUILayout.Height(18),
+    };
+
+    [MenuItem("Window/Undopector Floating Window")]
+    private static void OpenAsUtility()
+    {
+        CreateInstance();
+        instance.ShowUtility();
+        instance.minSize = WindowMinSize;
+    }
+
     [MenuItem("Window/Undopector")]
     private static void Open()
     {
-        if(instance == null)
+        CreateInstance();
+        instance.Show();
+    }
+
+    private static void CreateInstance()
+    {
+        CloseInstance();
+        if (instance == null)
         {
             instance = CreateInstance<UndopectorWindow>();
         }
 
         instance.titleContent.text = "Undopector";
-        instance.minSize = new Vector2(80, 24);
-        instance.ShowUtility();
+    }
+
+    private static void CloseInstance()
+    {
+        if(instance == null)
+        {
+            return;
+        }
+
+        instance.Close();
+        instance = null;
     }
 
     void OnGUI()
     {
         using(new GUILayout.HorizontalScope())
         {
-            var buttonGUILayoutOption = new GUILayoutOption[]
-            {
-                GUILayout.Width(24),
-                GUILayout.Height(18),
-            };
-
             EditorGUI.BeginDisabledGroup(this.currentIndex <= 0);
-            if (GUILayout.Button(this.undoImage, buttonGUILayoutOption))
+            if (GUILayout.Button(this.undoImage, ButtonGUILayoutOptions))
             {
                 this.registerSelection = false;
                 this.currentIndex--;
@@ -53,13 +81,25 @@ public class UndopectorWindow : EditorWindow
             EditorGUI.EndDisabledGroup();
 
             EditorGUI.BeginDisabledGroup(this.currentIndex >= this.instanceIds.Count - 1);
-            if (GUILayout.Button(this.redoImage, buttonGUILayoutOption))
+            if (GUILayout.Button(this.redoImage, ButtonGUILayoutOptions))
             {
                 this.registerSelection = false;
                 this.currentIndex++;
                 Selection.activeInstanceID = this.instanceIds[this.currentIndex];
             }
             EditorGUI.EndDisabledGroup();
+        }
+        using(var scrollView = new GUILayout.ScrollViewScope(this.scrollPosition))
+        {
+            using(var iconSize = new EditorGUIUtility.IconSizeScope(Vector2.one * 14))
+            {
+                for (var i = 0; i < this.instanceIds.Count; i++)
+                {
+                    this.DrawChangeSelectionButton(i);
+                }
+            }
+
+            scrollPosition = scrollView.scrollPosition;
         }
     }
 
@@ -82,5 +122,20 @@ public class UndopectorWindow : EditorWindow
 
         this.registerSelection = true;
         this.Repaint();
+    }
+
+    private void DrawChangeSelectionButton(int instanceIdsIndex)
+    {
+        var instanceId = this.instanceIds[instanceIdsIndex];
+
+        EditorGUI.BeginDisabledGroup(this.currentIndex == instanceIdsIndex);
+        var obj = EditorUtility.InstanceIDToObject(instanceId);
+        if (GUILayout.Button(EditorGUIUtility.ObjectContent(obj, obj.GetType()), GUI.skin.GetStyle("GUIEditor.BreadcrumbLeft")))
+        {
+            Selection.activeInstanceID = instanceId;
+            this.currentIndex = instanceIdsIndex;
+            this.registerSelection = false;
+        }
+        EditorGUI.EndDisabledGroup();
     }
 }
