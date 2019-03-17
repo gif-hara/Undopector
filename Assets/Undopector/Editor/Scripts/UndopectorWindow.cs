@@ -130,7 +130,7 @@ public class UndopectorWindow : EditorWindow
                 }
             }
 
-            scrollPosition = scrollView.scrollPosition;
+            this.scrollPosition = scrollView.scrollPosition;
         }
     }
 
