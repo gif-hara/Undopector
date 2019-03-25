@@ -76,6 +76,7 @@ public class UndopectorWindow : EditorWindow
     void OnGUI()
     {
         this.DrawUndoRedoButtons();
+        GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(1));
         this.DrawSelectedInstanceIdList();
     }
 
@@ -157,14 +158,25 @@ public class UndopectorWindow : EditorWindow
     {
         var instanceId = this.instanceIds[instanceIdsIndex];
 
-        EditorGUI.BeginDisabledGroup(this.currentIndex == instanceIdsIndex);
-        var obj = EditorUtility.InstanceIDToObject(instanceId);
-        if (GUILayout.Button(EditorGUIUtility.ObjectContent(obj, obj.GetType()), GUI.skin.GetStyle("GUIEditor.BreadcrumbLeft")))
+        using(new EditorGUI.DisabledGroupScope(this.currentIndex == instanceIdsIndex))
         {
-            Selection.activeInstanceID = instanceId;
-            this.currentIndex = instanceIdsIndex;
-            this.registerSelection = false;
+            using (new EditorGUILayout.VerticalScope())
+            {
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    if (this.currentIndex == instanceIdsIndex)
+                    {
+                        GUILayout.Box("", GUI.skin.GetStyle("Foldout"), GUILayout.Width(18));
+                    }
+                    var obj = EditorUtility.InstanceIDToObject(instanceId);
+                    if (GUILayout.Button(EditorGUIUtility.ObjectContent(obj, obj.GetType()), GUI.skin.GetStyle("GUIEditor.BreadcrumbLeft")))
+                    {
+                        Selection.activeInstanceID = instanceId;
+                        this.currentIndex = instanceIdsIndex;
+                        this.registerSelection = false;
+                    }
+                }
+            }
         }
-        EditorGUI.EndDisabledGroup();
     }
 }
