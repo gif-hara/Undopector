@@ -2,147 +2,150 @@
 using UnityEngine;
 using UnityEditor;
 
-public class UndopectorWindow : EditorWindow
+namespace HK.Undopector
 {
-    private List<int> instanceIds = new List<int>();
-
-    private int currentIndex = 0;
-
-    private bool registerSelection = true;
-
-    private Vector2 scrollPosition;
-
-    private static readonly Vector2 WindowMinSize = new Vector2(80, 24);
-
-    private static readonly GUILayoutOption[] ButtonGUILayoutOptions =
+    public class UndopectorWindow : EditorWindow
     {
-        GUILayout.Width(24),
-        GUILayout.Height(18),
-    };
+        private List<int> instanceIds = new List<int>();
 
-    [MenuItem("Window/Undopector Floating Window")]
-    private static void OpenAsUtility()
-    {
-        var instance = GetWindow(true);
-        instance.minSize = WindowMinSize;
-        var position = instance.position;
-        instance.position = new Rect(120, 120, WindowMinSize.x, WindowMinSize.y);
-        instance.ShowUtility();
-    }
+        private int currentIndex = 0;
 
-    [MenuItem("Window/Undopector")]
-    private static void Open()
-    {
-        GetWindow(false).Show();
-    }
+        private bool registerSelection = true;
 
-    private static UndopectorWindow GetWindow(bool utility)
-    {
-        // MEMO: すでに存在するウィンドウを明示的に閉じる
-        GetWindow<UndopectorWindow>().Close();
+        private Vector2 scrollPosition;
 
-        return GetWindow<UndopectorWindow>(utility, "Undopector", true);
-    }
+        private static readonly Vector2 WindowMinSize = new Vector2(80, 24);
 
-    void OnGUI()
-    {
-        this.DrawUndoRedoButtons();
-        GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(1));
-        this.DrawSelectedInstanceIdList();
-    }
-
-    void OnSelectionChange()
-    {
-        var instanceId = Selection.activeInstanceID;
-        if(this.registerSelection && instanceId != 0)
+        private static readonly GUILayoutOption[] ButtonGUILayoutOptions =
         {
-            if (this.currentIndex < this.instanceIds.Count - 1)
-            {
-                this.instanceIds = new List<int>(this.instanceIds.GetRange(0, this.currentIndex + 1));
-            }
+            GUILayout.Width(24),
+            GUILayout.Height(18),
+        };
 
-            if(this.instanceIds.Count <= 0 || this.instanceIds[this.instanceIds.Count - 1] != instanceId)
-            {
-                this.instanceIds.Add(instanceId);
-                this.currentIndex = this.instanceIds.Count - 1;
-            }
+        [MenuItem("Window/Undopector Floating Window")]
+        private static void OpenAsUtility()
+        {
+            var instance = GetWindow(true);
+            instance.minSize = WindowMinSize;
+            var position = instance.position;
+            instance.position = new Rect(120, 120, WindowMinSize.x, WindowMinSize.y);
+            instance.ShowUtility();
         }
 
-        this.registerSelection = true;
-        this.Repaint();
-    }
-
-    private void DrawUndoRedoButtons()
-    {
-        using (new GUILayout.HorizontalScope())
+        [MenuItem("Window/Undopector")]
+        private static void Open()
         {
-            EditorGUI.BeginDisabledGroup(this.currentIndex <= 0);
-            if (GUILayout.Button("<", ButtonGUILayoutOptions))
-            {
-                this.registerSelection = false;
-                this.currentIndex--;
-                Selection.activeInstanceID = this.instanceIds[this.currentIndex];
-            }
-            EditorGUI.EndDisabledGroup();
-
-            EditorGUI.BeginDisabledGroup(this.currentIndex >= this.instanceIds.Count - 1);
-            if (GUILayout.Button(">", ButtonGUILayoutOptions))
-            {
-                this.registerSelection = false;
-                this.currentIndex++;
-                Selection.activeInstanceID = this.instanceIds[this.currentIndex];
-            }
-            EditorGUI.EndDisabledGroup();
-        }
-    }
-
-    private void DrawSelectedInstanceIdList()
-    {
-        if(!this.CanDrawSelectedInstanceIdList)
-        {
-            return;
+            GetWindow(false).Show();
         }
 
-        using (var scrollView = new GUILayout.ScrollViewScope(this.scrollPosition))
+        private static UndopectorWindow GetWindow(bool utility)
         {
-            using (var iconSize = new EditorGUIUtility.IconSizeScope(Vector2.one * 14))
+            // MEMO: すでに存在するウィンドウを明示的に閉じる
+            GetWindow<UndopectorWindow>().Close();
+
+            return GetWindow<UndopectorWindow>(utility, "Undopector", true);
+        }
+
+        void OnGUI()
+        {
+            this.DrawUndoRedoButtons();
+            GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(1));
+            this.DrawSelectedInstanceIdList();
+        }
+
+        void OnSelectionChange()
+        {
+            var instanceId = Selection.activeInstanceID;
+            if (this.registerSelection && instanceId != 0)
             {
-                for (var i = 0; i < this.instanceIds.Count; i++)
+                if (this.currentIndex < this.instanceIds.Count - 1)
                 {
-                    this.DrawChangeSelectionButton(i);
+                    this.instanceIds = new List<int>(this.instanceIds.GetRange(0, this.currentIndex + 1));
+                }
+
+                if (this.instanceIds.Count <= 0 || this.instanceIds[this.instanceIds.Count - 1] != instanceId)
+                {
+                    this.instanceIds.Add(instanceId);
+                    this.currentIndex = this.instanceIds.Count - 1;
                 }
             }
 
-            this.scrollPosition = scrollView.scrollPosition;
+            this.registerSelection = true;
+            this.Repaint();
         }
-    }
 
-    private bool CanDrawSelectedInstanceIdList
-    {
-        get
+        private void DrawUndoRedoButtons()
         {
-            return this.position.width > WindowMinSize.x || this.position.height > WindowMinSize.y;
-        }
-    }
-
-    private void DrawChangeSelectionButton(int instanceIdsIndex)
-    {
-        var instanceId = this.instanceIds[instanceIdsIndex];
-
-        using (new EditorGUILayout.HorizontalScope())
-        {
-            if (this.currentIndex == instanceIdsIndex)
+            using (new GUILayout.HorizontalScope())
             {
-                GUILayout.Box("", GUI.skin.GetStyle("Foldout"), GUILayout.Width(18));
-            }
-            using (new EditorGUI.DisabledGroupScope(this.currentIndex == instanceIdsIndex))
-            {
-                var obj = EditorUtility.InstanceIDToObject(instanceId);
-                if (GUILayout.Button(EditorGUIUtility.ObjectContent(obj, obj.GetType()), GUI.skin.GetStyle("GUIEditor.BreadcrumbLeft")))
+                EditorGUI.BeginDisabledGroup(this.currentIndex <= 0);
+                if (GUILayout.Button("<", ButtonGUILayoutOptions))
                 {
-                    Selection.activeInstanceID = instanceId;
-                    this.currentIndex = instanceIdsIndex;
                     this.registerSelection = false;
+                    this.currentIndex--;
+                    Selection.activeInstanceID = this.instanceIds[this.currentIndex];
+                }
+                EditorGUI.EndDisabledGroup();
+
+                EditorGUI.BeginDisabledGroup(this.currentIndex >= this.instanceIds.Count - 1);
+                if (GUILayout.Button(">", ButtonGUILayoutOptions))
+                {
+                    this.registerSelection = false;
+                    this.currentIndex++;
+                    Selection.activeInstanceID = this.instanceIds[this.currentIndex];
+                }
+                EditorGUI.EndDisabledGroup();
+            }
+        }
+
+        private void DrawSelectedInstanceIdList()
+        {
+            if (!this.CanDrawSelectedInstanceIdList)
+            {
+                return;
+            }
+
+            using (var scrollView = new GUILayout.ScrollViewScope(this.scrollPosition))
+            {
+                using (var iconSize = new EditorGUIUtility.IconSizeScope(Vector2.one * 14))
+                {
+                    for (var i = 0; i < this.instanceIds.Count; i++)
+                    {
+                        this.DrawChangeSelectionButton(i);
+                    }
+                }
+
+                this.scrollPosition = scrollView.scrollPosition;
+            }
+        }
+
+        private bool CanDrawSelectedInstanceIdList
+        {
+            get
+            {
+                return this.position.width > WindowMinSize.x || this.position.height > WindowMinSize.y;
+            }
+        }
+
+        private void DrawChangeSelectionButton(int instanceIdsIndex)
+        {
+            var instanceId = this.instanceIds[instanceIdsIndex];
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                if (this.currentIndex == instanceIdsIndex)
+                {
+                    GUILayout.Box("", GUI.skin.GetStyle("Foldout"), GUILayout.Width(18));
+                }
+                using (new EditorGUI.DisabledGroupScope(this.currentIndex == instanceIdsIndex))
+                {
+                    var obj = EditorUtility.InstanceIDToObject(instanceId);
+                    if (GUILayout.Button(EditorGUIUtility.ObjectContent(obj, obj.GetType()), GUI.skin.GetStyle("GUIEditor.BreadcrumbLeft")))
+                    {
+                        Selection.activeInstanceID = instanceId;
+                        this.currentIndex = instanceIdsIndex;
+                        this.registerSelection = false;
+                    }
                 }
             }
         }
