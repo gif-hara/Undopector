@@ -3,16 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.Linq;
+using System;
 
 public class UndopectorWindow : EditorWindow
 {
     private static UndopectorWindow instance;
-
-    [SerializeField]
-    private Texture undoImage;
-
-    [SerializeField]
-    private Texture redoImage;
 
     private List<int> instanceIds = new List<int>();
 
@@ -29,6 +24,8 @@ public class UndopectorWindow : EditorWindow
         GUILayout.Width(24),
         GUILayout.Height(18),
     };
+
+
 
     [MenuItem("Window/Undopector Floating Window")]
     private static void OpenAsUtility()
@@ -106,7 +103,7 @@ public class UndopectorWindow : EditorWindow
         using (new GUILayout.HorizontalScope())
         {
             EditorGUI.BeginDisabledGroup(this.currentIndex <= 0);
-            if (GUILayout.Button(this.undoImage, ButtonGUILayoutOptions))
+            if (GUILayout.Button("<", ButtonGUILayoutOptions))
             {
                 this.registerSelection = false;
                 this.currentIndex--;
@@ -115,7 +112,7 @@ public class UndopectorWindow : EditorWindow
             EditorGUI.EndDisabledGroup();
 
             EditorGUI.BeginDisabledGroup(this.currentIndex >= this.instanceIds.Count - 1);
-            if (GUILayout.Button(this.redoImage, ButtonGUILayoutOptions))
+            if (GUILayout.Button(">", ButtonGUILayoutOptions))
             {
                 this.registerSelection = false;
                 this.currentIndex++;
@@ -158,23 +155,20 @@ public class UndopectorWindow : EditorWindow
     {
         var instanceId = this.instanceIds[instanceIdsIndex];
 
-        using(new EditorGUI.DisabledGroupScope(this.currentIndex == instanceIdsIndex))
+        using (new EditorGUILayout.HorizontalScope())
         {
-            using (new EditorGUILayout.VerticalScope())
+            if (this.currentIndex == instanceIdsIndex)
             {
-                using (new EditorGUILayout.HorizontalScope())
+                GUILayout.Box("", GUI.skin.GetStyle("Foldout"), GUILayout.Width(18));
+            }
+            using (new EditorGUI.DisabledGroupScope(this.currentIndex == instanceIdsIndex))
+            {
+                var obj = EditorUtility.InstanceIDToObject(instanceId);
+                if (GUILayout.Button(EditorGUIUtility.ObjectContent(obj, obj.GetType()), GUI.skin.GetStyle("GUIEditor.BreadcrumbLeft")))
                 {
-                    if (this.currentIndex == instanceIdsIndex)
-                    {
-                        GUILayout.Box("", GUI.skin.GetStyle("Foldout"), GUILayout.Width(18));
-                    }
-                    var obj = EditorUtility.InstanceIDToObject(instanceId);
-                    if (GUILayout.Button(EditorGUIUtility.ObjectContent(obj, obj.GetType()), GUI.skin.GetStyle("GUIEditor.BreadcrumbLeft")))
-                    {
-                        Selection.activeInstanceID = instanceId;
-                        this.currentIndex = instanceIdsIndex;
-                        this.registerSelection = false;
-                    }
+                    Selection.activeInstanceID = instanceId;
+                    this.currentIndex = instanceIdsIndex;
+                    this.registerSelection = false;
                 }
             }
         }
