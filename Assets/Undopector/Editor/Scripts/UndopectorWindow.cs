@@ -1,14 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using System.Linq;
-using System;
 
 public class UndopectorWindow : EditorWindow
 {
-    private static UndopectorWindow instance;
-
     private List<int> instanceIds = new List<int>();
 
     private int currentIndex = 0;
@@ -25,49 +20,28 @@ public class UndopectorWindow : EditorWindow
         GUILayout.Height(18),
     };
 
-
-
     [MenuItem("Window/Undopector Floating Window")]
     private static void OpenAsUtility()
     {
-        CreateInstance();
-        instance.ShowUtility();
+        var instance = GetWindow(true);
         instance.minSize = WindowMinSize;
         var position = instance.position;
-        position.x = 320;
-        position.y = 240;
-        position.width = WindowMinSize.x;
-        position.height = WindowMinSize.y;
-        instance.position = position;
+        instance.position = new Rect(120, 120, WindowMinSize.x, WindowMinSize.y);
+        instance.ShowUtility();
     }
 
     [MenuItem("Window/Undopector")]
     private static void Open()
     {
-        CreateInstance();
-        instance.Show();
+        GetWindow(false).Show();
     }
 
-    private static void CreateInstance()
+    private static UndopectorWindow GetWindow(bool utility)
     {
-        CloseInstance();
-        if (instance == null)
-        {
-            instance = CreateInstance<UndopectorWindow>();
-        }
+        // MEMO: すでに存在するウィンドウを明示的に閉じる
+        GetWindow<UndopectorWindow>().Close();
 
-        instance.titleContent.text = "Undopector";
-    }
-
-    private static void CloseInstance()
-    {
-        if(instance == null)
-        {
-            return;
-        }
-
-        instance.Close();
-        instance = null;
+        return GetWindow<UndopectorWindow>(utility, "Undopector", true);
     }
 
     void OnGUI()
