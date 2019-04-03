@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.Linq;
 
 namespace HK.Undopector
 {
@@ -50,6 +51,11 @@ namespace HK.Undopector
             GetWindow<UndopectorWindow>().Close();
 
             return GetWindow<UndopectorWindow>(utility, "Undopector", true);
+        }
+
+        void OnEnable()
+        {
+            this.LoadInstanceIds();
         }
 
         void OnGUI()
@@ -160,16 +166,39 @@ namespace HK.Undopector
                 this.instanceIds.Add(instanceId);
                 this.currentIndex = this.instanceIds.Count - 1;
             }
+
+            this.RegisterInstanceIdsToEditorPrefs();
         }
 
         private bool CanAddSelectionAsset(int instanceId)
         {
-            if(instanceId == 0)
+            if (instanceId == 0)
             {
                 return false;
             }
 
             return this.registerSelection;
         }
+
+
+        private void RegisterInstanceIdsToEditorPrefs()
+        {
+            var value = string.Join(",", this.instanceIds.Select(i => i.ToString()));
+            EditorPrefs.SetString(this.EditorPrefsInstanceIdsKey, value);
+        }
+
+        private void LoadInstanceIds()
+        {
+            var key = this.EditorPrefsInstanceIdsKey;
+            if (this.instanceIds.Count > 0 || !EditorPrefs.HasKey(key))
+            {
+                return;
+            }
+
+            var value = EditorPrefs.GetString(key);
+            this.instanceIds.AddRange(value.Split(',').Select(i => int.Parse(i)));
+        }
+
+        private string EditorPrefsInstanceIdsKey => "Undopector_InstanceIds_" + Application.persistentDataPath;
     }
 }
