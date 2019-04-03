@@ -10,6 +10,12 @@ namespace HK.Undopector
 
         private int currentIndex = 0;
 
+        /// <summary>
+        /// 選択されたアセットを登録出来るか
+        /// </summary>
+        /// <remarks>
+        /// UndoRedoボタンを押した際のアセットは<see cref="instanceIds"/>に登録したくないためこのフラグが必要になりました
+        /// </remarks>
         private bool registerSelection = true;
 
         private Vector2 scrollPosition;
@@ -55,21 +61,7 @@ namespace HK.Undopector
 
         void OnSelectionChange()
         {
-            var instanceId = Selection.activeInstanceID;
-            if (this.registerSelection && instanceId != 0)
-            {
-                if (this.currentIndex < this.instanceIds.Count - 1)
-                {
-                    this.instanceIds = new List<int>(this.instanceIds.GetRange(0, this.currentIndex + 1));
-                }
-
-                if (this.instanceIds.Count <= 0 || this.instanceIds[this.instanceIds.Count - 1] != instanceId)
-                {
-                    this.instanceIds.Add(instanceId);
-                    this.currentIndex = this.instanceIds.Count - 1;
-                }
-            }
-
+            this.AddSelectionAsset(Selection.activeInstanceID);
             this.registerSelection = true;
             this.Repaint();
         }
@@ -148,6 +140,36 @@ namespace HK.Undopector
                     }
                 }
             }
+        }
+
+        private void AddSelectionAsset(int instanceId)
+        {
+            // UndoRedoボタンを押した際に選択されたアセットは登録しない
+            if (!this.CanAddSelectionAsset(instanceId))
+            {
+                return;
+            }
+
+            if (this.currentIndex < this.instanceIds.Count - 1)
+            {
+                this.instanceIds = new List<int>(this.instanceIds.GetRange(0, this.currentIndex + 1));
+            }
+
+            if (this.instanceIds.Count <= 0 || this.instanceIds[this.instanceIds.Count - 1] != instanceId)
+            {
+                this.instanceIds.Add(instanceId);
+                this.currentIndex = this.instanceIds.Count - 1;
+            }
+        }
+
+        private bool CanAddSelectionAsset(int instanceId)
+        {
+            if(instanceId == 0)
+            {
+                return false;
+            }
+
+            return this.registerSelection;
         }
     }
 }
